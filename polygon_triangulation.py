@@ -1,6 +1,7 @@
 from typing import List
 from test_data import polygon
 from shapely.geometry import Point, Polygon
+from matplotlib import pyplot as plt
 
 
 class triangulation(polygon):
@@ -30,7 +31,7 @@ class triangulation(polygon):
             i = self.name[points.exterior.coords[0]]
             j = self.name[points.exterior.coords[2]]
             dp[i][j] = self.tri_perimeter(points)
-            #dp[j][i] = dp[i][j]
+            # dp[j][i] = dp[i][j]
             return dp[i][j]
 
         length = len(points.exterior.coords)-1
@@ -44,6 +45,11 @@ class triangulation(polygon):
                     continue
                 point1 = self.name[points.exterior.coords[i]]
                 point2 = self.name[points.exterior.coords[j]]
+                """
+                The dp[point 1][point 2]!=dp[point 2][point 1] as the first one sotres the 
+                perimeter of polygon in one side of the diagonal while other one stores the 
+                perimeter of the polygon in the other side of the same diagonal
+                """
                 if dp[point1][point2] == float('-inf'):
                     x, y = points.exterior.xy
                     x1 = x[i:j+1]
@@ -58,8 +64,23 @@ class triangulation(polygon):
                     min_peri = dp[point1][point2]+dp[point2][point1]
                     i_min = point1
                     j_min = point2
-        self.partition.append(sorted((i_min, j_min)))
+        if sorted((i_min, j_min)) not in self.partition:
+            self.partition.append(sorted((i_min, j_min)))
         return min_peri
+
+    def get_key(self, val):
+        for key, value in self.name.items():
+            if val == value:
+                return key
+
+    def visualize(self):
+        x, y = self.poly.exterior.xy
+        plt.plot(x, y)
+        for i in range(len(self.partition)):
+            x1, y1 = self.get_key(self.partition[i][0])
+            x2, y2 = self.get_key(self.partition[i][1])
+            plt.plot([x1, x2], [y1, y2])
+        plt.show()
 
 
 p = triangulation(5)
@@ -68,3 +89,4 @@ dp = [[float('-inf') for i in range(len(p.name))] for i in range(len(p.name))]
 p.dynamic(p.poly, dp)
 print(p.partition)
 p.plot()
+p.visualize()
