@@ -40,4 +40,3 @@ class polygon:
 p = polygon(5)
 p.generate()
 print(p.poly.exterior.coords[:])
-p.plot()
